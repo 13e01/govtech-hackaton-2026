@@ -29,33 +29,22 @@
 ### Вариант 1: macOS
 1. **Откройте Терминал:** Нажмите `Cmd + Space`, введите `Терминал` и нажмите Enter.
 2. **Перейдите в папку проекта:**
-   ```bash
+```bash
    cd /путь/к/папке/govtech-hackaton-2026
-
 ```
-
 3. **Создайте виртуальное окружение (выполняется 1 раз):**
 ```bash
 python3 -m venv venv
-
 ```
-
-
 4. **Активируйте окружение:**
 ```bash
 source venv/bin/activate
-
 ```
-
-
 *(Убедитесь, что слева появилась надпись `(venv)`).*
 5. **Установите зависимости проекта:**
 ```bash
 pip install pandas google-genai streamlit
-
 ```
-
-
 6. **Перейдите к разделу «Запуск проекта» (ниже).**
 
 ---
@@ -66,33 +55,21 @@ pip install pandas google-genai streamlit
 2. **Перейдите в папку проекта:**
 ```bash
 cd /путь/к/папке/govtech-hackaton-2026
-
 ```
-
-
 3. **Создайте виртуальное окружение:**
 ```bash
 python3 -m venv venv
-
 ```
-
-
 *Примечание: Если Linux выдаст ошибку об отсутствии пакета venv, сначала выполните `sudo apt install python3-venv`, а затем повторите команду выше.*
 4. **Активируйте окружение:**
 ```bash
 source venv/bin/activate
-
 ```
-
-
 *(Убедитесь, что слева появилась надпись `(venv)`).*
 5. **Установите зависимости проекта:**
 ```bash
 pip install pandas google-genai streamlit
-
 ```
-
-
 6. **Перейдите к разделу «Запуск проекта» (ниже).**
 
 ---
@@ -103,45 +80,27 @@ pip install pandas google-genai streamlit
 2. **Перейдите в папку проекта:**
 ```cmd
 cd C:\путь\к\папке\govtech-hackaton-2026
-
 ```
-
-
 3. **Создайте виртуальное окружение:**
 ```cmd
 python -m venv venv
-
 ```
-
-
 4. **Активируйте окружение:**
 * Если используете стандартный **cmd**:
 ```cmd
 venv\Scripts\activate.bat
-
 ```
-
-
 * Если используете **PowerShell**:
 ```powershell
 venv\Scripts\Activate.ps1
-
 ```
-
-
 *(Если PowerShell выдает ошибку выполнения скриптов, пропишите команду: `Set-ExecutionPolicy Unrestricted -Scope CurrentUser`, затем повторите активацию).*
 *(Убедитесь, что слева появилась надпись `(venv)`).*
-
-
 5. **Установите зависимости проекта:**
 ```cmd
 pip install pandas google-genai streamlit
-
 ```
-
-
 6. **Перейдите к разделу «Запуск проекта» (ниже).**
-
 ---
 
 ## Запуск проекта
@@ -167,7 +126,6 @@ pip install pandas google-genai streamlit
 
 ```bash
 streamlit run app.py
-
 ```
 
 После выполнения команды в терминале появятся две ссылки (Local URL и Network URL). Скопируйте ссылку `http://localhost:8501` и откройте её в браузере. Там будет доступен интерфейс Ситуационного центра.
@@ -183,7 +141,3 @@ streamlit run app.py
 * В Windows (cmd): `venv\Scripts\activate.bat`
 
 Как только появится `(venv)`, можете сразу запускать `streamlit run app.py` или `python analyzer.py`.
-
-```
-
-```
