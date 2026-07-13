@@ -4,8 +4,7 @@ from google.genai import types
 import json
 import time
 
-# Для хакатона хардкод ключа — это ОК. 
-API_KEY = "AQ.Ab8RN6IVGrVhMQK6bF9rEkpfQLSRyBPAu99O1_Xyku62FRF2eA"
+API_KEY = "AQ.Ab8RN6KAb67KNF4-PftpLO7Fsn9a1FdovLO7blcPJlGFZcujTw"
 client = genai.Client(api_key=API_KEY)
 
 def analyze_text(text):
