@@ -2,9 +2,9 @@ import os
 import json
 import time
 import pandas as pd
+import openai
 from openai import OpenAI
 
-# Укажите здесь ваш API-ключ DeepSeek
 API_KEY = "your_deepseek_api_key_here" 
 client = OpenAI(api_key=API_KEY, base_url="https://api.deepseek.com")
 
@@ -35,7 +35,6 @@ def analyze_text(text):
     Текст сообщения: "{text}"
     """
     
-    # Запрос к модели deepseek-chat с принудительным выводом JSON
     response = client.chat.completions.create(
         model='deepseek-chat',
         messages=[
@@ -46,7 +45,6 @@ def analyze_text(text):
     
     raw_text = response.choices[0].message.content.strip()
     
-    # Резервная очистка от markdown-разметки (хотя json_object обычно возвращает чистую строку)
     if raw_text.startswith("```"):
         lines = raw_text.splitlines()
         if lines[0].startswith("```"):
@@ -66,7 +64,7 @@ def main():
     output_file = "analyzed_city_messages.csv"
     
     if os.path.exists(output_file):
-        print(f"Найден файл прошлым запуском: {output_file}. Продолжаем...")
+        print(f"Найден файл прошлым запуском: {output_file}. Продолжение обработки...")
         df = pd.read_csv(output_file)
     else:
         if not os.path.exists(input_file):
@@ -93,32 +91,52 @@ def main():
             df.at[index, 'is_critical'] = analysis.get("is_critical", False)
             df.at[index, 'explanation'] = analysis.get("explanation", "")
             
-            # У DeepSeek лимиты на RPM лояльнее, паузу можно снизить до 1-2 секунд
             time.sleep(1.5) 
             
-        except json.JSONDecodeError as json_err:
-            print(f"Ошибка парсинга JSON на строке {index + 1}. Пропускаем...")
+        except json.JSONDecodeError:
+            print(f"Ошибка парсинга JSON (строка {index + 1}). Пропуск.")
             df.at[index, 'category'] = "Ошибка JSON"
             df.at[index, 'explanation'] = "Модель вернула некорректный формат."
             
-        except Exception as e:
-            error_str = str(e)
-            # Переписана логика перехвата ошибок лимитов под формат OpenAI-клиента
-            if "429" in error_str or "rate_limit" in error_str.lower():
-                print("Поймали лимит запросов (429). Ждем 45 секунд...")
-                time.sleep(45)
-                df.at[index, 'category'] = "Не обработано" 
-            else:
-                print(f"Неизвестная ошибка на строке {index + 1}: {e}")
-                df.at[index, 'category'] = "Ошибка"
-                time.sleep(5)
+        except openai.APIConnectionError:
+            print("Ошибка сети: Нет соединения с сервером. Ожидание 15 секунд...")
+            time.sleep(15)
+            df.at[index, 'category'] = "Не обработано"
             
-            df.to_csv(output_file, index=False)
-            continue
-
+        except openai.AuthenticationError:
+            print("Ошибка 401: Неверный API_KEY. Работа скрипта остановлена.")
+            break
+            
+        except openai.APIStatusError as e:
+            status_code = e.status_code
+            
+            if status_code == 402:
+                print("Ошибка 402: Недостаточно средств на балансе (Insufficient Balance). Работа скрипта остановлена.")
+                break
+                
+            elif status_code == 429:
+                print("Ошибка 429: Превышен лимит запросов (Rate Limit). Ожидание 30 секунд...")
+                time.sleep(30)
+                df.at[index, 'category'] = "Не обработано"
+                
+            elif status_code >= 500:
+                print(f"Ошибка сервера {status_code}. Ожидание 15 секунд...")
+                time.sleep(15)
+                df.at[index, 'category'] = "Не обработано"
+                
+            else:
+                print(f"Ошибка API {status_code}: {e.message}")
+                df.at[index, 'category'] = "Ошибка API"
+                time.sleep(5)
+                
+        except Exception as e:
+            print(f"Непредвиденная ошибка (строка {index + 1}): {e}")
+            df.at[index, 'category'] = "Ошибка"
+            time.sleep(5)
+            
         df.to_csv(output_file, index=False)
 
-    print(f"Готово. Результаты сохранены в {output_file}.")
+    print(f"Обработка завершена. Результаты сохранены в {output_file}.")
 
 if __name__ == "__main__":
     main()
