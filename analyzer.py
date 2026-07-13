@@ -5,7 +5,7 @@ import pandas as pd
 import openai
 from openai import OpenAI
 
-API_KEY = "your_deepseek_api_key_here" 
+API_KEY = "Your_DeepSeek_API_Key_Here"  # Замените на ваш реальный API-ключ DeepSeek
 client = OpenAI(api_key=API_KEY, base_url="https://api.deepseek.com")
 
 def analyze_text(text):
@@ -72,11 +72,17 @@ def main():
             return
         df = pd.read_csv(input_file)
         
+    # Исправление типов данных для предотвращения ошибки float64
     for col in ['category', 'explanation']:
         if col not in df.columns:
             df[col] = "Не обработано"
+        else:
+            df[col] = df[col].fillna("Не обработано").astype(str)
+            
     if 'is_critical' not in df.columns:
         df['is_critical'] = False
+    else:
+        df['is_critical'] = df['is_critical'].fillna(False).astype(bool)
 
     for index, row in df.iterrows():
         current_status = str(row.get('category')).strip()
@@ -87,9 +93,9 @@ def main():
         
         try:
             analysis = analyze_text(row['text'])
-            df.at[index, 'category'] = analysis.get("category", "Флуд")
-            df.at[index, 'is_critical'] = analysis.get("is_critical", False)
-            df.at[index, 'explanation'] = analysis.get("explanation", "")
+            df.at[index, 'category'] = str(analysis.get("category", "Флуд"))
+            df.at[index, 'is_critical'] = bool(analysis.get("is_critical", False))
+            df.at[index, 'explanation'] = str(analysis.get("explanation", ""))
             
             time.sleep(1.5) 
             
@@ -137,6 +143,6 @@ def main():
         df.to_csv(output_file, index=False)
 
     print(f"Обработка завершена. Результаты сохранены в {output_file}.")
-
+    
 if __name__ == "__main__":
     main()
