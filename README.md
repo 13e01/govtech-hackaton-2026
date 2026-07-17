@@ -10,8 +10,8 @@
 **Прототип системы интеллектуального скоринга и маршрутизации входящих сообщений для государственных органов.**
 
 **Авторы проекта:**
-* [13e01](https://github.com/13e01)
-* [luxeropDev](https://github.com/luxeropDev)
+ [13e01](https://github.com/13e01)
+ [luxeropDev](https://github.com/luxeropDev)
 
 </div>
 
