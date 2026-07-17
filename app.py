@@ -1,6 +1,41 @@
 import os
 import pandas as pd
 import streamlit as st
+from dotenv import load_dotenv
+from openai import OpenAI
+
+
+AI_SYSTEM_PROMPT = (
+    "Ты — GovTech AI Assistant проекта. Отвечай только по обращениям сервиса. "
+    "Формат: уровень риска, краткое объяснение, 1–3 действия, ответственная служба. "
+    "Максимум 120 слов. Если вопрос не относится к сервису — ответь: "
+    "\"Я могу помочь только по вопросам данного сервиса\"."
+)
+
+
+def get_ai_recommendation(situation: str) -> str:
+    """Запрашивает рекомендацию у OpenAI; выполняется только на сервере Streamlit."""
+    load_dotenv()
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise RuntimeError("Не задан OPENAI_API_KEY в файле .env.")
+
+    client = OpenAI(api_key=api_key)
+    response = client.chat.completions.create(
+        model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+        messages=[
+            {"role": "system", "content": AI_SYSTEM_PROMPT},
+            {"role": "user", "content": situation.strip()},
+        ],
+        temperature=0.2,
+        max_tokens=120,
+    )
+    recommendation = (response.choices[0].message.content or "").strip()
+    if not recommendation:
+        raise RuntimeError("Сервис не вернул рекомендацию.")
+
+    # Лимит модели задаётся в токенах; дополнительно соблюдаем лимит в 120 слов.
+    return " ".join(recommendation.split()[:120])
 
 # ==========================================
 # GITHUB-STYLE CSS (Primer Design System)
@@ -159,6 +194,12 @@ LANGUAGES = {
         "human_decision": "Финальное решение принимает специалист.",
         "btn_approve": "Утвердить и передать в службу",
         "toast_approved": "Инцидент передан в работу",
+        "ai_consultant": "AI-консультант",
+        "ai_situation": "Опишите ситуацию",
+        "ai_situation_placeholder": "Например: во дворе открыт люк рядом с детской площадкой.",
+        "ai_get_recommendation": "Получить рекомендацию",
+        "ai_empty_situation": "Опишите ситуацию, чтобы получить рекомендацию.",
+        "ai_error": "Не удалось получить рекомендацию. Проверьте подключение к API и попробуйте ещё раз.",
         "error_file": "Файл analyzed_city_messages.csv не найден. Запустите скрипт обработки данных.",
         "cats": {
             "ЖКХ": "ЖКХ", "Дороги": "Дороги", "Общественный транспорт": "Транспорт",
@@ -221,6 +262,12 @@ LANGUAGES = {
         "human_decision": "Соңғы шешімді маман қабылдайды.",
         "btn_approve": "Бекіту және қызметке беру",
         "toast_approved": "Оқиға жұмысқа жіберілді",
+        "ai_consultant": "AI-кеңесші",
+        "ai_situation": "Жағдайды сипаттаңыз",
+        "ai_situation_placeholder": "Мысалы: балалар алаңының жанындағы аулада ашық құдық бар.",
+        "ai_get_recommendation": "Ұсыныс алу",
+        "ai_empty_situation": "Ұсыныс алу үшін жағдайды сипаттаңыз.",
+        "ai_error": "Ұсынысты алу мүмкін болмады. API қосылымын тексеріп, қайталап көріңіз.",
         "error_file": "analyzed_city_messages.csv табылмады. Деректерді өңдеу скриптін іске қосыңыз.",
         "cats": {
             "ЖКХ": "ТҮКШ", "Дороги": "Жолдар", "Общественный транспорт": "Көлік",
@@ -283,6 +330,12 @@ LANGUAGES = {
         "human_decision": "The final decision is made by a specialist.",
         "btn_approve": "Approve and Dispatch",
         "toast_approved": "Incident dispatched",
+        "ai_consultant": "AI consultant",
+        "ai_situation": "Describe the situation",
+        "ai_situation_placeholder": "For example: an open manhole is next to a playground.",
+        "ai_get_recommendation": "Get recommendation",
+        "ai_empty_situation": "Describe the situation to get a recommendation.",
+        "ai_error": "Could not get a recommendation. Check the API connection and try again.",
         "error_file": "analyzed_city_messages.csv not found. Run the data processing script.",
         "cats": {
             "ЖКХ": "Utilities", "Дороги": "Roads", "Общественный транспорт": "Transport",
@@ -492,6 +545,28 @@ try:
                         if st.button(t['btn_approve'], key=f"btn_{idx}"):
                             st.session_state[btn_key] = True
                             st.rerun()
+
+                    st.markdown("<hr style='border: 0; border-top: 1px solid #d0d7de; margin: 24px 0 16px;'>", unsafe_allow_html=True)
+                    st.markdown(f"**{t['ai_consultant']}**")
+                    situation = st.text_area(
+                        t['ai_situation'],
+                        placeholder=t['ai_situation_placeholder'],
+                        max_chars=1000,
+                        key=f"ai_situation_{idx}",
+                    )
+                    advice_key = f"ai_advice_{idx}"
+                    if st.button(t['ai_get_recommendation'], key=f"ai_button_{idx}"):
+                        if not situation.strip():
+                            st.warning(t['ai_empty_situation'])
+                        else:
+                            try:
+                                with st.spinner("AI формирует рекомендацию..."):
+                                    st.session_state[advice_key] = get_ai_recommendation(situation)
+                            except Exception:
+                                st.error(t['ai_error'])
+
+                    if st.session_state.get(advice_key):
+                        st.info(st.session_state[advice_key])
 
     with tab_analytics:
         col_a, col_b = st.columns(2)
