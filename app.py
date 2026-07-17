@@ -3,62 +3,182 @@ import pandas as pd
 import streamlit as st
 
 # ==========================================
-# МАТРИЦА ЛОКАЛИЗАЦИИ
+# GITHUB-STYLE CSS (Primer Design System)
+# ==========================================
+st.markdown("""
+<style>
+    /* Системные шрифты как на GitHub */
+    body, .stApp, .stMarkdown, .stTextInput, .stSelectbox, .stButton, .stExpander {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif !important;
+    }
+    
+    /* НЕ задаем жесткий фон и цвет текста для .stApp, чтобы работал переключатель темы Streamlit */
+    
+    /* Сайдбар: только граница, без жесткого фона */
+    section[data-testid="stSidebar"] {
+        border-right: 1px solid var(--secondary-background-color, #d0d7de) !important;
+    }
+    
+    /* Статусные бейджи (вместо эмодзи) */
+    .status-badge {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        margin-right: 8px;
+    }
+    .status-critical { background-color: #ffebe9; color: #cf222e; border: 1px solid #ffc1c0; }
+    .status-high { background-color: #fff8c5; color: #9a6700; border: 1px solid #d4a72c; }
+    .status-planned { background-color: #dafbe1; color: #1a7f37; border: 1px solid #2da44e; }
+    .status-spam { background-color: #f6f8fa; color: #57606a; border: 1px solid #d0d7de; }
+    
+    /* Экспандеры как карточки инцидентов на GitHub */
+    .streamlit-expanderHeader {
+        background-color: var(--secondary-background-color, #f6f8fa) !important;
+        border: 1px solid var(--secondary-background-color, #d0d7de) !important;
+        border-radius: 6px !important;
+        font-weight: 600 !important;
+        color: var(--text-color, #24292f) !important;
+        font-size: 14px !important;
+    }
+    .streamlit-expanderHeader:hover {
+        background-color: var(--secondary-background-color, #eef1f4) !important;
+    }
+    .streamlit-expanderContent {
+        border: 1px solid var(--secondary-background-color, #d0d7de) !important;
+        border-top: none !important;
+        border-radius: 0 0 6px 6px !important;
+        background-color: var(--background-color, #ffffff) !important;
+        padding: 16px !important;
+    }
+    
+    /* Цитата сообщения */
+    .message-quote {
+        background-color: var(--secondary-background-color, #f6f8fa);
+        border-left: 4px solid var(--secondary-background-color, #d0d7de);
+        padding: 12px 16px;
+        border-radius: 0 6px 6px 0;
+        color: var(--text-color, #57606a);
+        font-size: 14px;
+        line-height: 1.5;
+        margin: 8px 0 16px 0;
+    }
+    
+    /* Кнопки в стиле GitHub (Primary Green) */
+    .stButton>button {
+        background-color: #2da44e !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(27,31,36,0.15) !important;
+        border-radius: 6px !important;
+        font-weight: 500 !important;
+        font-size: 14px !important;
+        padding: 6px 16px !important;
+        transition: background-color 0.2s !important;
+    }
+    .stButton>button:hover {
+        background-color: #2c974b !important;
+    }
+    .stButton>button:disabled {
+        background-color: #94d3a2 !important;
+        cursor: not-allowed !important;
+    }
+    
+    /* Метрики */
+    [data-testid="stMetricValue"] {
+        font-size: 28px !important;
+        font-weight: 600 !important;
+        color: var(--text-color, #24292f) !important;
+    }
+    [data-testid="stMetricLabel"] {
+        font-size: 14px !important;
+        color: var(--text-color, #57606a) !important;
+        font-weight: 500 !important;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    /* Скрыть лишние элементы Streamlit */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    .stDeployButton {visibility: hidden;}
+    
+    /* Табы */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 24px;
+    }
+    .stTabs [data-baseweb="tab"] {
+        height: 40px;
+        font-weight: 600;
+        color: var(--text-color, #57606a);
+    }
+    .stTabs [aria-selected="true"] {
+        color: var(--text-color, #24292f) !important;
+        border-bottom: 2px solid #fd8c73 !important; /* GitHub orange accent */
+    }
+</style>
+""", unsafe_allow_html=True)
+
+
+# ==========================================
+# МАТРИЦА ЛОКАЛИЗАЦИИ (Строгий стиль, без эмодзи)
 # ==========================================
 LANGUAGES = {
-    "🇷🇺 Русский": {
+    "Русский": {
         "lang_code": "ru",
-        "title": "📊 Ситуационный центр г. Астана",
-        "subtitle": "Мониторинг инцидентов и AI-скоринг угроз.",
+        "title": "Ситуационный центр г. Астана",
+        "subtitle": "Мониторинг инцидентов и автоматический скоринг угроз",
         "metric_total": "Всего обращений",
-        "metric_crit": "Критические (>80%)",
+        "metric_crit": "Критические",
         "metric_avg": "Средний уровень угрозы",
         "filter_header": "Фильтры",
-        "filter_cat": "Категории инцидентов:",
-        "filter_score": "Минимальный уровень угрозы (%):",
+        "filter_cat": "Категории инцидентов",
+        "filter_score": "Минимальный уровень угрозы (%)",
         "tab_feed": "Лента инцидентов",
         "tab_analytics": "Аналитика",
-        "no_messages": "Нет данных для отображения.",
+        "tab_data": "Данные и эффект",
+        "no_messages": "Нет данных для отображения по выбранным фильтрам.",
         "label_loc": "Локация",
         "label_src": "Источник",
         "label_date": "Дата",
-        "ai_explain": "Обоснование ИИ (Explainability)",
-        "reason_base": "Угроза",
-        "reason_scope": "Масштаб",
-        "reason_triggers": "Триггеры",
+        "ai_explain": "Обоснование оценки",
+        "reason_base": "Фактор угрозы",
+        "reason_scope": "Масштаб воздействия",
+        "reason_triggers": "Ключевые триггеры",
         "top_factors": "Топ-3 фактора результата",
         "factor_threat": "Угроза",
         "factor_scope": "Масштаб",
         "factor_repetition": "Повторяемость",
         "no_repetition": "Повторных обращений по локации не выявлено.",
-        "model_confidence": "Уверенность модели",
-        "confidence_note": "Уверенность отражает оценку модели по полноте и однозначности сообщения; это не гарантия точности.",
-        "limitations": "Ограничения модели",
-        "limitations_text": "Модель анализирует только текст обращения: возможны ошибки в адресе, категории и контексте. Оценка не заменяет выезд, проверку первичных источников и решение ответственной службы.",
+        "model_confidence": "Индекс достоверности",
+        "confidence_note": "Индекс отражает оценку алгоритма по полноте и однозначности сообщения; не является гарантией точности.",
+        "limitations": "Ограничения автоматического анализа",
+        "limitations_text": "Система анализирует только текст обращения: возможны ошибки в адресе, категории и контексте. Оценка не заменяет выезд, проверку первичных источников и решение ответственной службы.",
         "human_decision": "Финальное решение принимает специалист.",
         "btn_approve": "Утвердить и передать в службу",
-        "toast_approved": "Инцидент передан в работу!",
-        "error_file": "Файл analyzed_city_messages.csv не найден. Запустите analyzer.py.",
+        "toast_approved": "Инцидент передан в работу",
+        "error_file": "Файл analyzed_city_messages.csv не найден. Запустите скрипт обработки данных.",
         "cats": {
             "ЖКХ": "ЖКХ", "Дороги": "Дороги", "Общественный транспорт": "Транспорт",
-            "Экология": "Экология", "Безопасность": "Безопасность", "Мусор": "Мусор", "Флуд": "Флуд"
+            "Экология": "Экология", "Безопасность": "Безопасность", "Мусор": "Мусор", "Флуд": "Спам / Инфошум"
         },
-        "status_critical": "КРИТИЧЕСКИЙ",
-        "status_high": "ПОВЫШЕННЫЙ",
-        "status_planned": "ПЛАНОВЫЙ",
-        "status_flood": "ФЛУД",
+        "status_critical": "Критический",
+        "status_high": "Повышенный",
+        "status_planned": "Плановый",
+        "status_flood": "Спам",
         "rep_bonus_text": "Повторяемость",
-        "rep_bonus_desc": "Начислен бонус (+{bonus}%) за массовые жалобы.",
+        "rep_bonus_desc": "Начислен бонус (+{bonus}%) за массовые жалобы",
         "chart_categories": "Распределение по категориям",
         "chart_dynamics": "Динамика уровня угрозы",
         "chart_dynamics_hint": "Средний скор по дням",
-        "btn_refresh": "🔄 Обновить данные",
-        "tab_data": "Данные и эффект",
+        "btn_refresh": "Обновить данные",
         "data_docs": "Документация по данным",
         "data_source": "Источник: демонстрационный, моделируемый набор обращений жителей Астаны из неформальных каналов (соцсети и чаты); не является официальным реестром.",
         "data_size": "Размер: 120 текстовых сообщений в city_messages.csv.",
         "data_features": "Признаки: текст, источник, дата; после анализа — категория, локация, индекс угрозы, масштаб, триггеры и повторяемость.",
-        "data_preprocessing": "Очистка и обработка: проверка обязательных полей, приведение даты и числовых значений, нормализация названий локаций, фильтрация флуда и объединение повторных сигналов по локации.",
+        "data_preprocessing": "Очистка и обработка: проверка обязательных полей, приведение даты и числовых значений, нормализация названий локаций, фильтрация спама и объединение повторных сигналов по локации.",
         "data_limitations": "Ограничения данных: небольшой демонстрационный набор, сообщения могут быть неполными или эмоциональными, а их достоверность и адрес требуют проверки специалистом.",
         "effect": "Измеримый эффект",
         "effect_time": "Потенциальная экономия времени",
@@ -68,122 +188,122 @@ LANGUAGES = {
         "effect_load_desc": "Все обращения получают автоматическую первичную категоризацию и скоринг; специалист верифицирует только решение.",
         "effect_priority_desc": "Обращения с индексом угрозы от 80% вынесены в начало ленты для оперативной проверки.",
     },
-    "🇰🇿 Қазақша": {
+    "Қазақша": {
         "lang_code": "kz",
-        "title": "📊 Астана қ. Ситуациялық орталығы",
-        "subtitle": "Оқиғаларды мониторингілеу және AI-скоринг.",
+        "title": "Астана қ. Ситуациялық орталығы",
+        "subtitle": "Оқиғаларды мониторингілеу және автоматты скоринг",
         "metric_total": "Барлық өтініштер",
-        "metric_crit": "Критикалық (>80%)",
+        "metric_crit": "Критикалық",
         "metric_avg": "Орташа қауіп деңгейі",
         "filter_header": "Сүзгілер",
-        "filter_cat": "Оқиғалар санаттары:",
-        "filter_score": "Минималды қауіп деңгейі (%):",
+        "filter_cat": "Оқиғалар санаттары",
+        "filter_score": "Минималды қауіп деңгейі (%)",
         "tab_feed": "Оқиғалар таспасы",
         "tab_analytics": "Аналитика",
-        "no_messages": "Көрсетілетін деректер жоқ.",
+        "tab_data": "Деректер және әсер",
+        "no_messages": "Таңдалған сүзгілер бойынша деректер жоқ.",
         "label_loc": "Орналасқан жері",
         "label_src": "Дереккөз",
         "label_date": "Күн",
-        "ai_explain": "Жасанды интеллект негіздемесі",
-        "reason_base": "Қауіп",
-        "reason_scope": "Ауқымы",
-        "reason_triggers": "Триггерлер",
+        "ai_explain": "Бағалау негіздемесі",
+        "reason_base": "Қауіп факторы",
+        "reason_scope": "Әсер ету ауқымы",
+        "reason_triggers": "Негізгі триггерлер",
         "top_factors": "Нәтижеге әсер еткен 3 фактор",
         "factor_threat": "Қауіп",
         "factor_scope": "Ауқым",
         "factor_repetition": "Қайталану",
         "no_repetition": "Локация бойынша қайталанған өтініштер анықталмады.",
-        "model_confidence": "Модель сенімділігі",
-        "confidence_note": "Сенімділік хабарламаның толықтығы мен бірмәнділігіне берілген модель бағасын көрсетеді; бұл дәлдік кепілі емес.",
-        "limitations": "Модель шектеулері",
-        "limitations_text": "Модель тек өтініш мәтінін талдайды: мекенжайда, санатта және контексте қателер болуы мүмкін. Баға жауапты қызметтің тексеруін, шығуын және шешімін алмастырмайды.",
+        "model_confidence": "Сенімділік индексі",
+        "confidence_note": "Индекс хабарламаның толықтығы мен бірмәнділігіне берілген алгоритм бағасын көрсетеді; бұл дәлдік кепілі емес.",
+        "limitations": "Автоматты талдау шектеулері",
+        "limitations_text": "Жүйе тек өтініш мәтінін талдайды: мекенжайда, санатта және контексте қателер болуы мүмкін. Баға жауапты қызметтің тексеруін, шығуын және шешімін алмастырмайды.",
         "human_decision": "Соңғы шешімді маман қабылдайды.",
         "btn_approve": "Бекіту және қызметке беру",
-        "toast_approved": "Оқиға жұмысқа жіберілді!",
-        "error_file": "analyzed_city_messages.csv табылмады. analyzer.py іске қосыңыз.",
+        "toast_approved": "Оқиға жұмысқа жіберілді",
+        "error_file": "analyzed_city_messages.csv табылмады. Деректерді өңдеу скриптін іске қосыңыз.",
         "cats": {
             "ЖКХ": "ТҮКШ", "Дороги": "Жолдар", "Общественный транспорт": "Көлік",
-            "Экология": "Экология", "Безопасность": "Қауіпсіздік", "Мусор": "Қоқыс", "Флуд": "Флуд"
+            "Экология": "Экология", "Безопасность": "Қауіпсіздік", "Мусор": "Қоқыс", "Флуд": "Спам"
         },
-        "status_critical": "КРИТИКАЛЫҚ",
-        "status_high": "ЖОҒАРЫ",
-        "status_planned": "ЖОСПАРЛЫ",
-        "status_flood": "ФЛУД",
+        "status_critical": "Критикалық",
+        "status_high": "Жоғары",
+        "status_planned": "Жоспарлы",
+        "status_flood": "Спам",
         "rep_bonus_text": "Қайталану",
-        "rep_bonus_desc": "Жаппай шағымдар үшін бонус қосылды (+{bonus}%).",
+        "rep_bonus_desc": "Жаппай шағымдар үшін бонус қосылды (+{bonus}%)",
         "chart_categories": "Санаттар бойынша бөлу",
         "chart_dynamics": "Қауіп деңгейінің динамикасы",
         "chart_dynamics_hint": "Күн бойынша агрегация",
-        "btn_refresh": "🔄 Деректерді жаңарту",
-        "tab_data": "Деректер және әсер",
+        "btn_refresh": "Деректерді жаңарту",
         "data_docs": "Деректер құжаттамасы",
-        "data_source": "Дереккөз: Астана тұрғындарының бейресми арналарынан (әлеуметтік желілер мен чаттар) алынған өтініштердің демонстрациялық, модельденген жинағы; ресми тізілім емес.",
+        "data_source": "Дереккөз: Астана тұрғындарының бейресми арналарынан алынған өтініштердің демонстрациялық жинағы; ресми тізілім емес.",
         "data_size": "Көлемі: city_messages.csv файлындағы 120 мәтіндік хабарлама.",
         "data_features": "Белгілер: мәтін, дереккөз, күн; талдаудан кейін — санат, локация, қауіп индексі, ауқым, триггерлер және қайталану.",
-        "data_preprocessing": "Өңдеу: міндетті өрістерді тексеру, күн мен сандық мәндерді келтіру, локация атауларын қалыпқа келтіру, флудты сүзу және локация бойынша қайталанатын сигналдарды біріктіру.",
-        "data_limitations": "Шектеулер: шағын демонстрациялық жинақ, хабарламалар толық емес не эмоциялы болуы мүмкін; олардың дұрыстығы мен мекенжайын маман тексеруі керек.",
+        "data_preprocessing": "Өңдеу: міндетті өрістерді тексеру, күн мен сандық мәндерді келтіру, локация атауларын қалыпқа келтіру, спамды сүзу.",
+        "data_limitations": "Шектеулер: шағын демонстрациялық жинақ, хабарламалар толық емес не эмоциялы болуы мүмкін.",
         "effect": "Өлшенетін әсер",
         "effect_time": "Уақытты ықтимал үнемдеу",
         "effect_load": "Қолмен орындалатын жүктемені азайту",
         "effect_priority": "Тәуекелдерді басымдыққа қою",
-        "effect_time_desc": "Сценарийлік бағалау: бір хабарламаны қолмен бастапқы талдауға 2 минут кеткенде.",
-        "effect_load_desc": "Барлық өтініш автоматты бастапқы санаттау мен скорингтен өтеді; маман шешімді ғана тексереді.",
+        "effect_time_desc": "Сценарийлік бағалау: бір хабарламаны қолмен талдауға 2 минут кеткенде.",
+        "effect_load_desc": "Барлық өтініш автоматты санаттау мен скорингтен өтеді; маман шешімді ғана тексереді.",
         "effect_priority_desc": "Қауіп индексі 80%-дан жоғары өтініштер жедел тексеру үшін лентаның басына шығарылады.",
     },
-    "🇬🇧 English": {
+    "English": {
         "lang_code": "en",
-        "title": "📊 Astana Situational Center",
-        "subtitle": "Incident monitoring and AI threat scoring.",
+        "title": "Astana Situational Center",
+        "subtitle": "Incident monitoring and automated threat scoring",
         "metric_total": "Total Reports",
-        "metric_crit": "Critical (>80%)",
+        "metric_crit": "Critical",
         "metric_avg": "Avg Threat Level",
         "filter_header": "Filters",
-        "filter_cat": "Categories:",
-        "filter_score": "Min Threat Level (%):",
+        "filter_cat": "Categories",
+        "filter_score": "Min Threat Level (%)",
         "tab_feed": "Incident Feed",
         "tab_analytics": "Analytics",
-        "no_messages": "No data available.",
+        "tab_data": "Data and impact",
+        "no_messages": "No data available for selected filters.",
         "label_loc": "Location",
         "label_src": "Source",
         "label_date": "Date",
-        "ai_explain": "AI Explainability",
-        "reason_base": "Threat",
-        "reason_scope": "Scope",
-        "reason_triggers": "Triggers",
+        "ai_explain": "Assessment Details",
+        "reason_base": "Threat Factor",
+        "reason_scope": "Impact Scope",
+        "reason_triggers": "Key Triggers",
         "top_factors": "Top 3 result factors",
         "factor_threat": "Threat",
         "factor_scope": "Scope",
         "factor_repetition": "Repetition",
         "no_repetition": "No repeated reports for this location were found.",
-        "model_confidence": "Model confidence",
-        "confidence_note": "Confidence reflects the model's assessment of report completeness and clarity; it is not a guarantee of accuracy.",
-        "limitations": "Model limitations",
-        "limitations_text": "The model only analyzes report text, so location, category, and context can be wrong. The score does not replace field verification, source checks, or the responsible service's decision.",
+        "model_confidence": "Confidence Score",
+        "confidence_note": "Score reflects the algorithm's assessment of report completeness and clarity; it is not a guarantee of accuracy.",
+        "limitations": "Automated analysis limitations",
+        "limitations_text": "The system only analyzes report text, so location, category, and context can be wrong. The score does not replace field verification or the responsible service's decision.",
         "human_decision": "The final decision is made by a specialist.",
-        "btn_approve": "Approve & Dispatch",
-        "toast_approved": "Incident dispatched!",
-        "error_file": "analyzed_city_messages.csv not found. Run analyzer.py.",
+        "btn_approve": "Approve and Dispatch",
+        "toast_approved": "Incident dispatched",
+        "error_file": "analyzed_city_messages.csv not found. Run the data processing script.",
         "cats": {
             "ЖКХ": "Utilities", "Дороги": "Roads", "Общественный транспорт": "Transport",
-            "Экология": "Ecology", "Безопасность": "Security", "Мусор": "Garbage", "Флуд": "Flood"
+            "Экология": "Ecology", "Безопасность": "Security", "Мусор": "Garbage", "Флуд": "Spam"
         },
-        "status_critical": "CRITICAL",
-        "status_high": "ELEVATED",
-        "status_planned": "PLANNED",
-        "status_flood": "FLOOD",
+        "status_critical": "Critical",
+        "status_high": "Elevated",
+        "status_planned": "Planned",
+        "status_flood": "Spam",
         "rep_bonus_text": "Repetition",
-        "rep_bonus_desc": "Bonus (+{bonus}%) applied for mass complaints.",
+        "rep_bonus_desc": "Bonus (+{bonus}%) applied for mass complaints",
         "chart_categories": "Distribution by category",
         "chart_dynamics": "Threat level dynamics",
         "chart_dynamics_hint": "Daily aggregation",
-        "btn_refresh": "🔄 Refresh data",
-        "tab_data": "Data and impact",
+        "btn_refresh": "Refresh data",
         "data_docs": "Data documentation",
-        "data_source": "Source: a demonstrative, simulated dataset of Astana residents' reports from informal channels (social media and chats); it is not an official registry.",
+        "data_source": "Source: a demonstrative, simulated dataset of Astana residents' reports from informal channels; not an official registry.",
         "data_size": "Size: 120 text messages in city_messages.csv.",
-        "data_features": "Features: text, source, date; after analysis—category, location, threat score, scope, triggers, and repetition.",
-        "data_preprocessing": "Processing: required-field checks, date and numeric normalization, location-name normalization, flood filtering, and grouping repeated signals by location.",
-        "data_limitations": "Data limitations: a small demonstrative dataset; messages may be incomplete or emotional, and their accuracy and location require specialist verification.",
+        "data_features": "Features: text, source, date; after analysis — category, location, threat score, scope, triggers, and repetition.",
+        "data_preprocessing": "Processing: required-field checks, date and numeric normalization, location-name normalization, spam filtering.",
+        "data_limitations": "Data limitations: a small demonstrative dataset; messages may be incomplete or emotional.",
         "effect": "Measurable impact",
         "effect_time": "Potential time savings",
         "effect_load": "Reduced manual workload",
@@ -199,25 +319,22 @@ LANGUAGES = {
 # ==========================================
 st.set_page_config(page_title="Ситуационный Центр", page_icon="📊", layout="wide")
 
-st.sidebar.markdown("### 🌐 Тіл / Язык / Language")
+st.sidebar.markdown("Язык / Тіл / Language")
 selected_lang = st.sidebar.selectbox("Lang", list(LANGUAGES.keys()), index=0, label_visibility="collapsed")
 t = LANGUAGES[selected_lang]
 lang_code = t["lang_code"]
 
 st.title(t["title"])
-st.markdown(t["subtitle"])
+st.markdown(f"<div style='color: #57606a; font-size: 16px; margin-top: -10px; margin-bottom: 24px;'>{t['subtitle']}</div>", unsafe_allow_html=True)
 
 @st.cache_data(ttl=60)
 def load_data():
     try:
         df = pd.read_csv("analyzed_city_messages.csv")
-        
-        # Проверка на пустой файл (только заголовки)
         if df.empty:
-            st.warning(t.get("warning_empty_data", "Файл данных пуст. Запустите analyzer.py для обработки."))
-            return pd.DataFrame() # Возвращаем пустой DataFrame
+            st.warning("Файл данных пуст. Запустите скрипт обработки данных.")
+            return pd.DataFrame()
 
-        # Обязательные колонки (включая мультиязычные)
         required_cols = [
             'criticality_score', 'rep_bonus', 'category', 'extracted_location',
             'base_threat_reason_ru', 'scope_reason_ru',
@@ -226,37 +343,57 @@ def load_data():
             'trigger_words', 'text'
         ]
 
-        # Graceful handling для date/source
         if 'date' not in df.columns:
             df['date'] = pd.Timestamp.now().strftime('%Y-%m-%d')
         if 'source' not in df.columns:
             df['source'] = 'unknown'
 
+        df['date'] = pd.to_datetime(df['date'], errors='coerce')
+
         missing = [c for c in required_cols if c not in df.columns]
         if missing:
-            st.error(f"❌ Ошибка структуры данных. Отсутствуют колонки: {missing}.")
-            st.info("💡 Решение: Удалите старый `analyzed_city_messages.csv` и запустите `analyzer.py` заново.")
+            st.error(f"Ошибка структуры данных. Отсутствуют колонки: {missing}.")
+            st.info("Решение: Удалите старый `analyzed_city_messages.csv` и запустите скрипт обработки заново.")
             return pd.DataFrame()
 
         return df
-
     except FileNotFoundError:
-        st.error(t.get("error_file", "Файл `analyzed_city_messages.csv` не найден."))
-        st.info("💡 **Как это исправить:**\n1. Убедитесь, что вы запустили `python analyzer.py`\n2. Или положите готовый демо-файл в корень проекта.")
+        st.error("Файл `analyzed_city_messages.csv` не найден.")
+        st.info("Как это исправить:\n1. Убедитесь, что вы запустили скрипт обработки данных.\n2. Или положите готовый демо-файл в корень проекта.")
         return pd.DataFrame()
     except Exception as e:
         st.error(f"Непредвиденная ошибка при загрузке данных: {e}")
         return pd.DataFrame()
+    
+def get_status_config(score):
+    if score >= 80: return "status-critical", t["status_critical"]
+    if score >= 50: return "status-high", t["status_high"]
+    if score > 0: return "status-planned", t["status_planned"]
+    return "status-spam", t["status_flood"]
+
+def get_model_confidence(row):
+    confidence = row.get('model_confidence')
+    if pd.notna(confidence):
+        return max(0, min(100, int(confidence)))
+    fields = ['base_threat_reason_ru', 'scope_reason_ru', 'trigger_words', 'extracted_location']
+    completed = sum(
+        pd.notna(row.get(field)) and str(row.get(field)).strip().lower() not in ['', 'nan', 'не обработано']
+        for field in fields
+    )
+    return 55 + completed * 10
+
 # ==========================================
 # ОСНОВНОЙ БЛОК
 # ==========================================
 try:
-    # Кнопка обновления данных
     if st.sidebar.button(t["btn_refresh"]):
         st.cache_data.clear()
         st.rerun()
 
     df = load_data()
+    if df.empty:
+        st.stop()
+
     crit_count = len(df[df['criticality_score'] >= 80])
     avg_score = int(df['criticality_score'].mean())
 
@@ -264,9 +401,9 @@ try:
     col1.metric(t["metric_total"], len(df))
     col2.metric(t["metric_crit"], crit_count)
     col3.metric(t["metric_avg"], f"{avg_score}%")
-    st.markdown("---")
+    st.markdown("<hr style='border: 0; border-top: 1px solid #d0d7de; margin: 24px 0;'>", unsafe_allow_html=True)
 
-    st.sidebar.header(t["filter_header"])
+    st.sidebar.markdown(f"### {t['filter_header']}")
     raw_cats = df['category'].dropna().unique().tolist()
     trans_cats_map = {cat: t["cats"].get(cat, cat) for cat in raw_cats}
 
@@ -287,22 +424,41 @@ try:
         else:
             for idx, row in filtered_df.iterrows():
                 score = row['criticality_score']
-                color, status_text = get_status_config(score, t)
+                css_class, status_text = get_status_config(score)
                 cat_trans = t["cats"].get(row['category'], row['category'])
                 loc = row.get('extracted_location', '—')
                 if pd.isna(loc) or str(loc).lower() in ['nan', 'none', 'null', '']:
                     loc = '—'
 
-                header = f"{color} [{score}%] {status_text} | {cat_trans} | 📍 {loc}"
-                with st.expander(header, expanded=(score >= 80)):
-                    st.write(f"💬 *«{row['text']}»*")
-                    st.caption(
-                        f"📅 {t['label_date']}: {row['date'].strftime('%Y-%m-%d')} | "
-                        f"🌐 {t['label_src']}: {row['source']}"
+                # 1. Текстовый заголовок для самого экспандера (Streamlit не рендерит HTML в label)
+                expander_title = f"{status_text}  |  [{score}%]  |  {cat_trans}  |  {loc}"
+                
+                with st.expander(expander_title, expanded=(score >= 80)):
+                    
+                    # 2. Красивый HTML-блок с бейджами рендерим ВНУТРИ экспандера
+                    header_html = f"""
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                        <span class="status-badge {css_class}">{status_text}</span>
+                        <span style="font-weight: 600; color: #24292f; font-size: 16px;">[{score}%]</span>
+                        <span style="color: #57606a; font-weight: 500;">{cat_trans}</span>
+                        <span style="color: #8c959f;">|</span>
+                        <span style="color: #57606a; font-weight: 500;">{loc}</span>
+                    </div>
+                    """
+                    st.markdown(header_html, unsafe_allow_html=True)
+                    
+                    # Цитата сообщения
+                    st.markdown(f'<div class="message-quote">{row["text"]}</div>', unsafe_allow_html=True)
+                    
+                    date_str = row['date'].strftime('%Y-%m-%d') if pd.notna(row['date']) else '—'
+                    st.markdown(
+                        f"<div style='font-size: 13px; color: #57606a; margin-bottom: 16px;'>"
+                        f"<strong>{t['label_date']}:</strong> {date_str} &nbsp;|&nbsp; "
+                        f"<strong>{t['label_src']}:</strong> {row['source']}"
+                        f"</div>", unsafe_allow_html=True
                     )
-                    st.markdown(f"**🤖 {t['ai_explain']}:**")
-
-                    # Динамическое отображение reason на выбранном языке
+                    
+                    st.markdown(f"**{t['ai_explain']}**")
                     base_reason = row.get(f'base_threat_reason_{lang_code}', row.get('base_threat_reason_ru', '—'))
                     scope_reason = row.get(f'scope_reason_{lang_code}', row.get('scope_reason_ru', '—'))
 
@@ -317,21 +473,23 @@ try:
 
                     triggers = row.get('trigger_words', '—')
                     st.markdown(f"- **{t['reason_triggers']}:** `{triggers}`")
+                    
                     st.metric(t['model_confidence'], f"{get_model_confidence(row)}%")
                     st.caption(t['confidence_note'])
+                    
                     with st.expander(t['limitations']):
                         st.info(t['limitations_text'])
-                    st.warning(f"⚖️ {t['human_decision']}")
+                        
+                    st.warning(f"{t['human_decision']}")
 
-                    # Кнопка утверждения с сохранением состояния в сессии
                     btn_key = f"approved_{idx}"
                     if btn_key not in st.session_state:
                         st.session_state[btn_key] = False
 
                     if st.session_state[btn_key]:
-                        st.success(f"✅ {t['toast_approved']}")
+                        st.success(t['toast_approved'])
                     else:
-                        if st.button(f"✅ {t['btn_approve']}", key=f"btn_{idx}"):
+                        if st.button(t['btn_approve'], key=f"btn_{idx}"):
                             st.session_state[btn_key] = True
                             st.rerun()
 
@@ -346,9 +504,10 @@ try:
             st.markdown(f"**{t['chart_dynamics']}**")
             st.caption(t["chart_dynamics_hint"])
 
-            # Реальная динамика: агрегация по дням
             if not filtered_df.empty:
-                daily_scores = filtered_df.groupby(filtered_df['date'].dt.date)['criticality_score'].mean()
+                plot_df = filtered_df.copy()
+                plot_df['date'] = pd.to_datetime(plot_df['date'], errors='coerce')
+                daily_scores = plot_df.groupby(plot_df['date'].dt.date)['criticality_score'].mean()
                 daily_scores = daily_scores.reset_index()
                 daily_scores.columns = ['date', 'avg_score']
                 daily_scores = daily_scores.set_index('date')
@@ -364,6 +523,7 @@ try:
         st.write(t['data_preprocessing'])
         st.write(t['data_limitations'])
 
+        st.markdown("<hr style='border: 0; border-top: 1px solid #d0d7de; margin: 24px 0;'>", unsafe_allow_html=True)
         st.subheader(t['effect'])
         time_col, load_col, priority_col = st.columns(3)
         with time_col:
@@ -373,10 +533,8 @@ try:
             st.metric(t['effect_load'], f"{len(df)} / {len(df)}")
             st.caption(t['effect_load_desc'])
         with priority_col:
-            st.metric(t['effect_priority'], f"{crit_count} {t['metric_crit'].lower()}")
+            st.metric(t['effect_priority'], f"{crit_count}")
             st.caption(t['effect_priority_desc'])
 
-except FileNotFoundError:
-    st.error(t["error_file"])
-except ValueError as e:
-    st.error(str(e))
+except Exception as e:
+    st.error(f"Критическая ошибка приложения: {e}")
