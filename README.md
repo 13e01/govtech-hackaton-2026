@@ -1,3 +1,17 @@
+
+<div align="center">
+
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://your-demo-link-here.streamlit.app)
+![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+
+**AI-ассистент оператора ситуационного центра для GovTech**  
+*Анализ, категоризация и оценка критичности обращений граждан в реальном времени*
+
+</div>
+
+---
+
 # GovTech Camp 2026 — Умный помощник Ситуационного центра Астаны
 
 **Авторы:** Khan & Aslan
@@ -48,7 +62,7 @@
 Это оценка потенциала для демонстрационного набора, а не результат промышленного замера.
 
 ## Запуск проекта
-
+💡 Для быстрого демо: В репозитории уже содержится файл analyzed_city_messages.csv с примерами обработанных данных. Вы можете сразу запустить streamlit run app.py и увидеть работающий дашборд без необходимости иметь API-ключ DeepSeek!
 ### 1. Подготовить окружение
 
 ```bash

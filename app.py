@@ -209,58 +209,44 @@ st.markdown(t["subtitle"])
 
 @st.cache_data(ttl=60)
 def load_data():
-    df = pd.read_csv("analyzed_city_messages.csv")
+    try:
+        df = pd.read_csv("analyzed_city_messages.csv")
+        
+        # Проверка на пустой файл (только заголовки)
+        if df.empty:
+            st.warning(t.get("warning_empty_data", "Файл данных пуст. Запустите analyzer.py для обработки."))
+            return pd.DataFrame() # Возвращаем пустой DataFrame
 
-    # Обязательные колонки (включая мультиязычные)
-    required_cols = [
-        'criticality_score', 'rep_bonus', 'category', 'extracted_location',
-        'base_threat_reason_ru', 'scope_reason_ru',
-        'base_threat_reason_kz', 'scope_reason_kz',
-        'base_threat_reason_en', 'scope_reason_en',
-        'trigger_words', 'text'
-    ]
+        # Обязательные колонки (включая мультиязычные)
+        required_cols = [
+            'criticality_score', 'rep_bonus', 'category', 'extracted_location',
+            'base_threat_reason_ru', 'scope_reason_ru',
+            'base_threat_reason_kz', 'scope_reason_kz',
+            'base_threat_reason_en', 'scope_reason_en',
+            'trigger_words', 'text'
+        ]
 
-    # Graceful handling для date/source
-    if 'date' not in df.columns:
-        df['date'] = pd.Timestamp.now().strftime('%Y-%m-%d')
-    if 'source' not in df.columns:
-        df['source'] = 'unknown'
+        # Graceful handling для date/source
+        if 'date' not in df.columns:
+            df['date'] = pd.Timestamp.now().strftime('%Y-%m-%d')
+        if 'source' not in df.columns:
+            df['source'] = 'unknown'
 
-    missing = [c for c in required_cols if c not in df.columns]
-    if missing:
-        raise ValueError(f"Отсутствуют колонки: {missing}. Запустите analyzer.py с актуальной версией.")
+        missing = [c for c in required_cols if c not in df.columns]
+        if missing:
+            st.error(f"❌ Ошибка структуры данных. Отсутствуют колонки: {missing}.")
+            st.info("💡 Решение: Удалите старый `analyzed_city_messages.csv` и запустите `analyzer.py` заново.")
+            return pd.DataFrame()
 
-    df['criticality_score'] = pd.to_numeric(df['criticality_score'], errors='coerce').fillna(0).astype(int)
-    df['rep_bonus'] = pd.to_numeric(df.get('rep_bonus', 0), errors='coerce').fillna(0).astype(int)
-    if 'model_confidence' in df.columns:
-        df['model_confidence'] = pd.to_numeric(df['model_confidence'], errors='coerce')
+        return df
 
-    # Преобразуем date в datetime
-    df['date'] = pd.to_datetime(df['date'], errors='coerce').fillna(pd.Timestamp.now())
-
-    return df
-
-def get_status_config(score, t):
-    if score >= 80: return "🔴", t["status_critical"]
-    if score >= 50: return "🟠", t["status_high"]
-    if score > 0: return "🟢", t["status_planned"]
-    return "⚪", t["status_flood"]
-
-def get_model_confidence(row):
-    """Возвращает оценку уверенности из модели либо консервативный fallback для старых результатов."""
-    confidence = row.get('model_confidence')
-    if pd.notna(confidence):
-        return max(0, min(100, int(confidence)))
-
-    # Старые выгрузки не содержат поля model_confidence. Оценка основана на полноте
-    # структурированных факторов, а не выдаётся за результат повторного запуска модели.
-    fields = ['base_threat_reason_ru', 'scope_reason_ru', 'trigger_words', 'extracted_location']
-    completed = sum(
-        pd.notna(row.get(field)) and str(row.get(field)).strip().lower() not in ['', 'nan', 'не обработано']
-        for field in fields
-    )
-    return 55 + completed * 10
-
+    except FileNotFoundError:
+        st.error(t.get("error_file", "Файл `analyzed_city_messages.csv` не найден."))
+        st.info("💡 **Как это исправить:**\n1. Убедитесь, что вы запустили `python analyzer.py`\n2. Или положите готовый демо-файл в корень проекта.")
+        return pd.DataFrame()
+    except Exception as e:
+        st.error(f"Непредвиденная ошибка при загрузке данных: {e}")
+        return pd.DataFrame()
 # ==========================================
 # ОСНОВНОЙ БЛОК
 # ==========================================
