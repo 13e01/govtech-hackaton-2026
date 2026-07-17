@@ -128,7 +128,7 @@ def analyze_text(client: OpenAI, text: str) -> dict:
     for attempt in range(MAX_RETRIES):
         try:
             response = client.chat.completions.create(
-                model='deepseek-chat',
+                model='deepseek-v4-flash',
                 messages=[{"role": "user", "content": prompt}],
                 response_format={"type": "json_object"}
             )

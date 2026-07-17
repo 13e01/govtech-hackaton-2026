@@ -6,36 +6,82 @@ from openai import OpenAI
 
 
 AI_SYSTEM_PROMPT = (
-    "Ты — GovTech AI Assistant проекта. Отвечай только по обращениям сервиса. "
-    "Формат: уровень риска, краткое объяснение, 1–3 действия, ответственная служба. "
-    "Максимум 120 слов. Если вопрос не относится к сервису — ответь: "
+    "Ты — GovTech AI Assistant проекта. Тебе дают текст обращения гражданина и инструкцию, как на него ответить. "
+    "Отвечай коротко, чётко и аргументированно. "
+    "Формат ответа: уровень риска, краткое объяснение, действия, ответственная служба. "
+    "Каждая рекомендация должна содержать одно фактное обоснование в поддержку уровня риска и одного или двух предложенных действий. "
+    "Не добавляй пояснений, не объясняй процесс и не упоминай язык запроса. "
+    "Если текст обращения содержит приветствие, игнорируй его. "
+    "Отвечай на языке самого обращения, если это возможно. "
+    "Если обращение не относится к сервису — ответь: "
     "\"Я могу помочь только по вопросам данного сервиса\"."
 )
 
 
-def get_ai_recommendation(situation: str) -> str:
-    """Запрашивает рекомендацию у OpenAI; выполняется только на сервере Streamlit."""
+def send_chat_response(messages: list[dict]) -> str:
+    """Отправляет сообщения в DeepSeek и возвращает окончательный ответ ассистента."""
     load_dotenv()
-    api_key = os.getenv("OPENAI_API_KEY")
+    api_key = os.getenv("DEEPSEEK_API_KEY")
     if not api_key:
-        raise RuntimeError("Не задан OPENAI_API_KEY в файле .env.")
+        raise RuntimeError("Не задан DEEPSEEK_API_KEY в файле .env.")
 
-    client = OpenAI(api_key=api_key)
+    client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
     response = client.chat.completions.create(
-        model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
-        messages=[
-            {"role": "system", "content": AI_SYSTEM_PROMPT},
-            {"role": "user", "content": situation.strip()},
-        ],
-        temperature=0.2,
-        max_tokens=120,
+        model='deepseek-v4-flash',
+        messages=messages,
+        temperature=0.0,
     )
-    recommendation = (response.choices[0].message.content or "").strip()
-    if not recommendation:
-        raise RuntimeError("Сервис не вернул рекомендацию.")
 
-    # Лимит модели задаётся в токенах; дополнительно соблюдаем лимит в 120 слов.
-    return " ".join(recommendation.split()[:120])
+    choice = response.choices[0] if response.choices else None
+    if not choice:
+        raise RuntimeError(f"Сервис вернул пустой ответ. full_response={response}")
+
+    message = getattr(choice, 'message', None)
+    content = (getattr(message, 'content', None) or "").strip() if message else ""
+    reasoning = (getattr(message, 'reasoning_content', None) or "").strip() if message else ""
+
+    if content:
+        return content
+
+    if reasoning:
+        followup_prompt = (
+            "Используй предыдущие рассуждения, чтобы сформировать финальный ответ по обращению. "
+            "Ответ должен быть в формате: уровень риска, краткое объяснение, действия, ответственная служба. "
+            "Не добавляй пояснений и не повторяй служебные инструкции."
+        )
+        followup_messages = [
+            {"role": "system", "content": AI_SYSTEM_PROMPT},
+            {"role": "assistant", "content": reasoning},
+            {"role": "user", "content": followup_prompt},
+        ]
+        response = client.chat.completions.create(
+            model='deepseek-v4-flash',
+            messages=followup_messages,
+            temperature=0.0,
+        )
+        choice = response.choices[0] if response.choices else None
+        message = getattr(choice, 'message', None)
+        content = (getattr(message, 'content', None) or "").strip() if message else ""
+        if content:
+            return content
+
+    raise RuntimeError(f"Сервис вернул пустой ответ. full_response={response}")
+
+
+def get_operator_recommendation(text: str) -> str:
+    """Сформировать краткую рекомендацию оператору по обращению."""
+    prompt = (
+        "Текст обращения: " + text.strip() + "\n"
+        "Ты — помощник оператору ситуационного центра. Составь краткую, чёткую и аргументированную рекомендацию по дальнейшим действиям: "
+        "уровень риска, краткое объяснение с обоснованием, конкретные шаги, ответственная служба. "
+        "Отвечай только по сути, без объяснений процесса, без дополнительных рассуждений."
+    )
+    return send_chat_response(
+        [
+            {"role": "system", "content": AI_SYSTEM_PROMPT},
+            {"role": "user", "content": prompt},
+        ]
+    )
 
 # ==========================================
 # GITHUB-STYLE CSS (Primer Design System)
@@ -548,22 +594,14 @@ try:
 
                     st.markdown("<hr style='border: 0; border-top: 1px solid #d0d7de; margin: 24px 0 16px;'>", unsafe_allow_html=True)
                     st.markdown(f"**{t['ai_consultant']}**")
-                    situation = st.text_area(
-                        t['ai_situation'],
-                        placeholder=t['ai_situation_placeholder'],
-                        max_chars=1000,
-                        key=f"ai_situation_{idx}",
-                    )
+
                     advice_key = f"ai_advice_{idx}"
-                    if st.button(t['ai_get_recommendation'], key=f"ai_button_{idx}"):
-                        if not situation.strip():
-                            st.warning(t['ai_empty_situation'])
-                        else:
-                            try:
-                                with st.spinner("AI формирует рекомендацию..."):
-                                    st.session_state[advice_key] = get_ai_recommendation(situation)
-                            except Exception:
-                                st.error(t['ai_error'])
+                    if st.button(t['ai_get_recommendation'], key=f'ai_button_{idx}'):
+                        try:
+                            with st.spinner("Генерирую рекомендацию для оператора..."):
+                                st.session_state[advice_key] = get_operator_recommendation(str(row['text']))
+                        except Exception as e:
+                            st.error(f"{t['ai_error']} ({e})")
 
                     if st.session_state.get(advice_key):
                         st.info(st.session_state[advice_key])
