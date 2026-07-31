@@ -133,8 +133,8 @@ python analyzer.py
 
 <div align="center">
 
-| Артефакт | Ссылка | Описание |
-| :--- | :--- | :--- |
+| Артефакт | Ссылка 
+| :--- | :--- | 
 | **Демо-видео** | **[СМОТРЕТЬ ВИДЕО](https://youtu.be/2i7qLHi2yIM?si=emfgw6aibvaCpPfw)**
 | **Презентация** | **[ОТКРЫТЬ СЛАЙДЫ](https://docs.google.com/presentation/d/1sJe5K-djNdSNWXhIJCms_YESLWTDxbHrARP5ljdh5YU/edit?usp=sharing)**
 
